@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Thêm sách mới</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<main class="card">
+    <h1>Thêm sách mới</h1>
+
+    <form th:action="@{/books}" th:object="${bookRequest}" method="post">
+        <div class="field">
+            <label for="title">Title:</label>
+            <input id="title" type="text" th:field="*{title}"/>
+            <p class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+        </div>
+
+        <div class="field">
+            <label for="author">Author:</label>
+            <input id="author" type="text" th:field="*{author}"/>
+            <p class="error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></p>
+        </div>
+
+        <div class="field">
+            <label for="price">Price:</label>
+            <input id="price" type="number" step="0.01" th:field="*{price}"/>
+            <p class="error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></p>
+        </div>
+
+        <button type="submit">Lưu sách</button>
+    </form>
+
+    <nav>
+        <a th:href="@{/register}">Form đăng ký tài khoản</a>
+    </nav>
+</main>
+</body>
+</html>

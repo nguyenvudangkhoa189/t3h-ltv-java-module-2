@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Đăng ký tài khoản</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<main class="card">
+    <h1>Đăng ký tài khoản</h1>
+
+    <form th:action="@{/register}" th:object="${account}" method="post">
+        <div class="field">
+            <label for="username">Username:</label>
+            <input id="username" type="text" th:field="*{username}"/>
+            <p class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
+        </div>
+
+        <div class="field">
+            <label for="email">Email:</label>
+            <input id="email" type="email" th:field="*{email}"/>
+            <p class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+        </div>
+
+        <div class="field">
+            <label for="password">Password:</label>
+            <input id="password" type="password" th:field="*{password}"/>
+            <p class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+        </div>
+
+        <div class="field">
+            <label for="age">Age:</label>
+            <input id="age" type="number" th:field="*{age}"/>
+            <p class="error" th:if="${#fields.hasErrors('age')}" th:errors="*{age}"></p>
+        </div>
+
+        <button type="submit">Đăng ký</button>
+    </form>
+
+    <nav>
+        <a th:href="@{/books/new}">Form thêm sách</a>
+    </nav>
+</main>
+</body>
+</html>
