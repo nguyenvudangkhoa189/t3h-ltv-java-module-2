@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Chi tiết sinh viên</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+    <main class="card">
+        <h1 th:text="${student.name}">Tên sinh viên</h1>
+        <p>ID: <span th:text="${student.id}">1</span></p>
+        <p>Email: <span th:text="${student.email}">email</span></p>
+        <p><a th:href="@{/students}">← Quay lại danh sách</a></p>
+    </main>
+</body>
+</html>

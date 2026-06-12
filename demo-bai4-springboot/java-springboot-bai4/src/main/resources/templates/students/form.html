@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Thêm sinh viên</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+    <main class="card">
+        <h1>Thêm sinh viên</h1>
+        <form th:action="@{/students}" th:object="${form}" method="post">
+            <p>
+                <label for="name">Tên</label><br/>
+                <input id="name" type="text" th:field="*{name}"/>
+                <span style="color:red" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Lỗi tên</span>
+            </p>
+            <p>
+                <label for="email">Email</label><br/>
+                <input id="email" type="email" th:field="*{email}"/>
+                <span style="color:red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Lỗi email</span>
+            </p>
+            <button type="submit">Lưu</button>
+            <a th:href="@{/students}">Hủy</a>
+        </form>
+    </main>
+</body>
+</html>

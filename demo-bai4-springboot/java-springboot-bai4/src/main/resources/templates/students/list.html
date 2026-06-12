@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Danh sách sinh viên</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+    <main class="card">
+        <h1>Danh sách sinh viên</h1>
+        <p><a th:href="@{/students/new}">+ Thêm sinh viên</a></p>
+        <table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse: collapse;">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên</th>
+                <th>Email</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="student : ${students}">
+                <td th:text="${student.id}">1</td>
+                <td th:text="${student.name}">Name</td>
+                <td th:text="${student.email}">email</td>
+                <td><a th:href="@{/students/{id}(id=${student.id})}">Chi tiết</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

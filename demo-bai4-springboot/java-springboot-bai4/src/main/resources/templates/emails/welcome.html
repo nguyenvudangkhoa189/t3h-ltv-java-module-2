@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Chào mừng</title>
+</head>
+<body>
+    <h1>Chào mừng, <span th:text="${userName}">User</span>!</h1>
+    <p>Email đăng ký: <strong th:text="${email}">email</strong></p>
+    <p>Đây là nội dung email render bằng <code>SpringTemplateEngine.process()</code> trong Service — không qua ViewResolver.</p>
+</body>
+</html>
