@@ -34,12 +34,12 @@ demo-bai5-springmvc/
     └── src/main/java/vn/demo/
         ├── DemoBai5SpringmvcApplication.java
         ├── controller/api/
-        │   ├── ProductApiController.java    ← mục 4, 7, 8, 10: GET/POST/PATCH + @RequestParam/@PathVariable/@RequestBody
+        │   ├── ProductApiController.java    ← mục 4, 7, 8, 10: GET/POST/PATCH + @RequestParam (bắt buộc/không bắt buộc)
         │   ├── NewsApiController.java         ← mục 7.5–7.6: trả object JSON + produces
         │   ├── CategoryApiController.java   ← mục 8, 9: POST/PUT form vs JSON
         │   ├── UserApiController.java       ← mục 7.7, 9.4, 10.3: GET + PUT + PATCH
         │   ├── OrderApiController.java      ← mục 11: DELETE query / path / body
-        │   └── BookApiController.java       ← phụ lục: CRUD đủ 5 HTTP method (in-memory)
+        │   └── BookApiController.java       ← phụ lục: search + CRUD, ResponseEntity + 404
         ├── service/
         │   └── BookService.java             ← lưu tạm List in-memory cho /api/v1/books
         ├── model/
@@ -70,13 +70,13 @@ demo-bai5-springmvc/
 
 ```
 1. @RestController vs @Controller     → so sánh với demo bài 4 (Thymeleaf)
-2. ProductApiController — GET         → list, @RequestParam, @PathVariable, ResponseEntity
+2. ProductApiController — GET         → list, @RequestParam (bắt buộc / không bắt buộc), @PathVariable
 3. NewsApiController                  → Jackson, DTO, produces APPLICATION_JSON
 4. ProductApiController — POST        → form (@RequestParam) vs JSON (@RequestBody), status 201
 5. CategoryApiController              → POST/PUT form + PUT JSON + POST games
 6. UserApiController                  → PUT toàn bộ (form) vs PATCH một phần (JSON)
 7. OrderApiController                 → DELETE query / path / batch body, status 204
-8. BookApiController + BookService    → phụ lục: CRUD tổng hợp, 404 khi không tìm thấy
+8. BookApiController + BookService    → phụ lục: search + CRUD tổng hợp, ResponseEntity + 404
 ```
 
 ---
@@ -86,30 +86,38 @@ demo-bai5-springmvc/
 | Thứ tự dạy | Mục | Tool test | URL / Method | File chính |
 |------------|-----|-----------|--------------|------------|
 | 1 | `@RestController` + GET list | Postman / Browser | `GET /api/v1/products` | `ProductApiController` |
-| 2 | `@RequestParam` | Postman / Browser | `GET /api/v1/products/search?id=5` | `ProductApiController` |
-| 3 | `@PathVariable` | Postman / Browser | `GET /api/v1/products/5` | `ProductApiController` |
-| 4 | Object → JSON + `produces` | Postman | `GET /api/v1/news/latest` | `NewsApiController`, `NewsDto` |
-| 5 | POST form | Postman | `POST /api/v1/products` (x-www-form-urlencoded: `name`, `price`, `color`) | `ProductApiController` |
-| 6 | POST JSON body | Postman | `POST /api/v1/products/json` | `ProductRequest`, `ProductApiController` |
-| 7 | POST form (thực hành) | Postman | `POST /api/v1/categories` (`name`, `location?`) | `CategoryApiController` |
-| 8 | POST JSON (thực hành) | Postman | `POST /api/v1/games` | `GameCreateRequest`, `CategoryApiController` |
-| 9 | PUT form | Postman | `PUT /api/v1/categories/1` | `CategoryApiController` |
-| 10 | PUT JSON body | Postman | `PUT /api/v1/categories/1/json` | `CategoryApiController` |
-| 11 | GET users | Postman / Browser | `GET /api/v1/users`, `GET /api/v1/users/1` | `UserApiController` |
-| 12 | PUT vs PATCH | Postman | `PUT /api/v1/users/1` (form) · `PATCH /api/v1/users/1` (JSON) | `UserApiController` |
-| 13 | PUT profile JSON | Postman | `PUT /api/v1/users/1/profile` | `UserProfileRequest`, `UserApiController` |
-| 14 | PATCH product | Postman | `PATCH /api/v1/products/1` body `{"price":899}` | `ProductPatchRequest`, `ProductApiController` |
-| 15 | DELETE query | Postman | `DELETE /api/v1/orders?id=5` → `204` | `OrderApiController` |
-| 16 | DELETE path | Postman | `DELETE /api/v1/orders/5` → `204` | `OrderApiController` |
-| 17 | DELETE batch body | Postman | `DELETE /api/v1/orders/batch` body `{"ids":["aaa","bbb"]}` | `OrderApiController` |
-| 18 | DELETE thực hành | Postman | `DELETE /api/v1/songs?title=...` · `DELETE /api/v1/songs/1` | `OrderApiController` |
-| 19 | Phụ lục — CRUD books | Postman | `GET/POST/PUT/PATCH/DELETE /api/v1/books[/{id}]` | `BookApiController`, `BookService` |
+| 2 | `@RequestParam` bắt buộc | Postman / Browser | `GET /api/v1/products/search?category=phone` | `ProductApiController` |
+| 3 | `@RequestParam` không bắt buộc | Postman / Browser | `GET /api/v1/products/search?category=phone&brand=Samsung` | `ProductApiController` |
+| 4 | `@RequestParam` + `defaultValue` | Postman / Browser | `GET /api/v1/products/search?category=laptop&sortBy=price` | `ProductApiController` |
+| 5 | Thiếu param bắt buộc → `400` | Postman / Browser | `GET /api/v1/products/search` (không có `category`) | `ProductApiController` |
+| 6 | `@PathVariable` | Postman / Browser | `GET /api/v1/products/5` | `ProductApiController` |
+| 7 | Object → JSON + `produces` | Postman | `GET /api/v1/news/latest` (trả object trực tiếp) | `NewsApiController`, `NewsDto` |
+| 7b | `ResponseEntity` + object JSON | Postman | `GET /api/v1/books/1` · `GET /api/v1/books/999` → `404` | `BookApiController` |
+| 8 | POST form | Postman | `POST /api/v1/products` (x-www-form-urlencoded: `name`, `price`, `color`) | `ProductApiController` |
+| 9 | POST JSON body | Postman | `POST /api/v1/products/json` | `ProductRequest`, `ProductApiController` |
+| 10 | POST form (thực hành) | Postman | `POST /api/v1/categories` (`name`, `location?`) | `CategoryApiController` |
+| 11 | POST JSON (thực hành) | Postman | `POST /api/v1/games` | `GameCreateRequest`, `CategoryApiController` |
+| 12 | PUT form | Postman | `PUT /api/v1/categories/1` | `CategoryApiController` |
+| 13 | PUT JSON body | Postman | `PUT /api/v1/categories/1/json` | `CategoryApiController` |
+| 14 | GET users | Postman / Browser | `GET /api/v1/users`, `GET /api/v1/users/1` | `UserApiController` |
+| 15 | PUT vs PATCH | Postman | `PUT /api/v1/users/1` (form) · `PATCH /api/v1/users/1` (JSON) | `UserApiController` |
+| 16 | PUT profile JSON | Postman | `PUT /api/v1/users/1/profile` | `UserProfileRequest`, `UserApiController` |
+| 17 | PATCH product | Postman | `PATCH /api/v1/products/1` body `{"price":899}` | `ProductPatchRequest`, `ProductApiController` |
+| 18 | DELETE query | Postman | `DELETE /api/v1/orders?id=5` → `204` | `OrderApiController` |
+| 19 | DELETE path | Postman | `DELETE /api/v1/orders/5` → `204` | `OrderApiController` |
+| 20 | DELETE batch body | Postman | `DELETE /api/v1/orders/batch` body `{"ids":["aaa","bbb"]}` | `OrderApiController` |
+| 21 | DELETE thực hành | Postman | `DELETE /api/v1/songs?title=...` · `DELETE /api/v1/songs/1` | `OrderApiController` |
+| 22 | Phụ lục — search books | Postman | `GET /api/v1/books/search?author=Robert C. Martin&title=Clean` | `BookApiController`, `BookService` |
+| 23 | Phụ lục — CRUD books | Postman | `GET/POST/PUT/PATCH/DELETE /api/v1/books[/{id}]` | `BookApiController`, `BookService` |
 
 ### HTTP status gợi ý khi test
 
 | Method | Status thường gặp | Endpoint ví dụ |
 |--------|-------------------|------------------|
-| GET | `200 OK` | `/api/v1/products` |
+| GET | `200 OK` | `/api/v1/products`, `/api/v1/products/search?category=phone` |
+| GET | `400 Bad Request` | `/api/v1/products/search` (thiếu `category`) |
+| GET | `200 OK` | `/api/v1/books/search?author=Robert C. Martin` |
+| GET | `400 Bad Request` | `/api/v1/books/search` (thiếu `author`) |
 | GET | `404 Not Found` | `/api/v1/books/999` |
 | POST | `201 Created` | `/api/v1/products/json`, `/api/v1/books` |
 | PUT / PATCH | `200 OK` | `/api/v1/users/1/profile` |

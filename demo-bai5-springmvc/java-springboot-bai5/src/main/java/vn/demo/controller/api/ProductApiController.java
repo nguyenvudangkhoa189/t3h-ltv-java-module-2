@@ -30,9 +30,19 @@ public class ProductApiController {
 	}
 
 	@GetMapping("/search")
-	public ResponseEntity<String> getProductByQuery(@RequestParam String id) {
-		System.out.println("Id value: " + id);
-		return new ResponseEntity<>("Product id: " + id, HttpStatus.OK);
+	public ResponseEntity<String> searchProducts(
+			@RequestParam String category,
+			@RequestParam(required = false) String brand,
+			@RequestParam(defaultValue = "name") String sortBy) {
+		System.out.println("Category: " + category);
+		System.out.println("Brand: " + brand);
+		System.out.println("Sort by: " + sortBy);
+
+		String message = "Category: " + category + ", sortBy: " + sortBy;
+		if (brand != null && !brand.isBlank()) {
+			message += ", brand: " + brand;
+		}
+		return new ResponseEntity<>(message, HttpStatus.OK);
 	}
 
 	@GetMapping("/{id}")

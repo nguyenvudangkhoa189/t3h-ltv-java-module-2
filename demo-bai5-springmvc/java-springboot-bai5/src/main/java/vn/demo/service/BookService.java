@@ -26,6 +26,14 @@ public class BookService {
 		return List.copyOf(books);
 	}
 
+	public List<Book> search(String author, String title) {
+		return books.stream()
+				.filter(book -> book.getAuthor().equalsIgnoreCase(author))
+				.filter(book -> title == null || title.isBlank()
+						|| book.getTitle().toLowerCase().contains(title.toLowerCase()))
+				.toList();
+	}
+
 	public Optional<Book> findById(Long id) {
 		return books.stream()
 				.filter(book -> book.getId().equals(id))

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import vn.demo.dto.BookPatchRequest;
@@ -36,6 +37,14 @@ public class BookApiController {
 				.map(Book::getTitle)
 				.collect(Collectors.toList());
 		return ResponseEntity.ok(titles);
+	}
+
+	@GetMapping("/search")
+	public ResponseEntity<List<Book>> searchBooks(
+			@RequestParam String author,
+			@RequestParam(required = false) String title) {
+		List<Book> result = bookService.search(author, title);
+		return ResponseEntity.ok(result);
 	}
 
 	@GetMapping("/{id}")
