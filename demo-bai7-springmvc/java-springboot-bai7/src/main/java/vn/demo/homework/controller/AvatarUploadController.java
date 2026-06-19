@@ -1,4 +1,4 @@
-package vn.demo.controller.api;
+package vn.demo.homework.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,36 +10,31 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import vn.demo.dto.FileUploadResponse;
-import vn.demo.service.FileStorageService;
+import vn.demo.upload.dto.FileUploadResponse;
+import vn.demo.upload.service.FileStorageService;
 
+/**
+ * Bài tập 1 — Upload avatar vào subFolder "avatars".
+ * Tái dùng FileStorageService của phần upload.
+ */
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/files")
-public class FileUploadController {
+public class AvatarUploadController {
 
 	private final FileStorageService fileStorageService;
 
-	@PostMapping("/upload")
-	public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
-		return handleUpload(file, "misc");
-	}
-
 	@PostMapping("/upload-avatar")
 	public ResponseEntity<?> uploadAvatar(@RequestParam("file") MultipartFile file) {
-		return handleUpload(file, "avatars");
-	}
-
-	private ResponseEntity<?> handleUpload(MultipartFile file, String subFolder) {
 		try {
-			String url = fileStorageService.store(file, subFolder);
+			String url = fileStorageService.store(file, "avatars");
 			return ResponseEntity.ok(new FileUploadResponse(url));
 		} catch (IllegalArgumentException e) {
-			log.warn("Upload rejected: {}", e.getMessage());
+			log.warn("Avatar upload rejected: {}", e.getMessage());
 			return ResponseEntity.badRequest().body(e.getMessage());
 		} catch (Exception e) {
-			log.error("Upload failed", e);
+			log.error("Avatar upload failed", e);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Upload failed: " + e.getMessage());
 		}

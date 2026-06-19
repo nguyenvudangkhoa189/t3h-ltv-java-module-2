@@ -1,4 +1,4 @@
-package vn.demo.service;
+package vn.demo.external.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import vn.demo.config.DummyJsonProperties;
+import vn.demo.external.config.DummyJsonProperties;
 
 @Slf4j
 @Service
@@ -21,12 +21,6 @@ public class ExternalApiService {
 		String url = dummyJsonProperties.getBaseUrl() + "/products?limit={limit}";
 		log.debug("Fetching products: limit={}", limit);
 		return restClient.get().uri(url, limit).retrieve().body(JsonNode.class);
-	}
-
-	public JsonNode fetchProductsByCategory(String category) {
-		String url = dummyJsonProperties.getBaseUrl() + "/products/category/{category}";
-		log.debug("Fetching products by category: {}", category);
-		return restClient.get().uri(url, category).retrieve().body(JsonNode.class);
 	}
 
 	public JsonNode fetchCategories() {

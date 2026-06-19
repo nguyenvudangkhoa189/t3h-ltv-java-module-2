@@ -2,6 +2,11 @@
 
 Project demo cho syllabus `java_m2_bai7_SpringMVC.md`. Gom tất cả ví dụ trong một Spring Boot app — chỉ dùng `@RestController` (JSON): upload ảnh với `MultipartFile` và proxy DummyJSON qua `RestClient`.
 
+> **Quy ước package:** chia theo **từng phần demo** (feature-based) thay vì theo layer. Nhìn tên package biết ngay code demo cho mục nào:
+> - `upload` → Phần 1 (Upload file)
+> - `external` → Phần 2 (External API)
+> - `homework` → Bài tập về nhà
+
 ## Chạy project
 
 ```bash
@@ -33,41 +38,45 @@ demo-bai7-springmvc/
     ├── mvnw
     └── src/main/java/vn/demo/
         ├── DemoBai7SpringmvcApplication.java
-        ├── config/
-        │   ├── RestClientConfig.java            ← mục 2.3: Bean RestClient
-        │   ├── DummyJsonProperties.java         ← mục 2.4: @ConfigurationProperties base URL
-        │   └── UploadResourceConfig.java        ← mục 1.5: map /uploads/** → thư mục ổ đĩa
-        ├── controller/api/
-        │   ├── FileUploadController.java        ← mục 1.6: POST upload + phụ lục bài 1 upload-avatar
-        │   └── ExternalApiController.java       ← mục 2.6: proxy DummyJSON + phụ lục bài 2 category
-        ├── dto/
-        │   └── FileUploadResponse.java          ← mục 1.4: JSON trả về sau upload
-        └── service/
-            ├── FileStorageService.java          ← mục 1.3: validate ảnh, UUID, lưu file
-            └── ExternalApiService.java          ← mục 2.5: gọi RestClient, trả JsonNode
+        ├── ServletInitializer.java
+        ├── upload/                              ← Phần 1: Upload file
+        │   ├── config/UploadResourceConfig.java     map /uploads/** → thư mục ổ đĩa
+        │   ├── controller/FileUploadController.java  POST /api/files/upload
+        │   ├── dto/FileUploadResponse.java           JSON trả về sau upload
+        │   └── service/FileStorageService.java       validate ảnh, UUID, lưu file
+        ├── external/                            ← Phần 2: External API
+        │   ├── config/RestClientConfig.java          Bean RestClient
+        │   ├── config/DummyJsonProperties.java       @ConfigurationProperties base URL
+        │   ├── controller/ExternalApiController.java proxy DummyJSON
+        │   └── service/ExternalApiService.java       gọi RestClient, trả JsonNode
+        └── homework/                            ← Bài tập về nhà
+            ├── controller/AvatarUploadController.java   BT1: POST /api/files/upload-avatar
+            ├── controller/ProductCategoryController.java BT2: GET products/category/{name}
+            └── service/HomeworkProductService.java       BT2: fetchProductsByCategory
     └── src/main/resources/
-        └── application.properties               ← mục 1.2: multipart limit, upload dir, API URL
+        └── application.properties               multipart limit, upload dir, API URL
 ```
 
 ### Phân tách package
 
-| Package | Vai trò |
-|---------|---------|
-| `config/` | Cấu hình bean (`RestClient`), properties, `ResourceHandler` |
-| `controller/api/` | `@RestController` — nhận request, trả JSON |
-| `service/` | Business logic: lưu file, gọi API ngoài — inject qua constructor |
-| `dto/` | Response object cho API |
+| Package | Phần demo | Vai trò |
+|---------|-----------|---------|
+| `upload` | Phần 1 | Nhận `MultipartFile`, validate + lưu file, cho browser xem ảnh |
+| `external` | Phần 2 | Gọi API ngoài bằng `RestClient`, trả `JsonNode` |
+| `homework` | Bài tập | Code bài tập đứng riêng, tái dùng bean dùng chung (`FileStorageService`, `RestClient`, `DummyJsonProperties`, `FileUploadResponse`) |
+
+> Mỗi package con dùng layer chuẩn `config` / `controller` / `dto` / `service`. Bài 7 không có `model` vì dữ liệu API ngoài đọc bằng `JsonNode`.
 
 ### Luồng dạy gợi ý
 
 ```
-1. application.properties                    → giới hạn upload, đường dẫn lưu file, URL DummyJSON
-2. FileStorageService                        → @Value, validate loại file, đổi tên UUID
-3. FileUploadResponse + UploadResourceConfig  → DTO + xem ảnh qua /uploads/**
-4. FileUploadController                      → MultipartFile, Postman upload
-5. RestClientConfig + DummyJsonProperties    → cấu hình gọi API ngoài
-6. ExternalApiService + ExternalApiController → JsonNode, proxy DummyJSON
-7. Phụ lục: upload-avatar + products/category
+1. application.properties                       → giới hạn upload, đường dẫn lưu file, URL DummyJSON
+2. upload.service.FileStorageService            → @Value, validate loại file, đổi tên UUID
+3. upload.dto + upload.config                   → DTO + xem ảnh qua /uploads/**
+4. upload.controller.FileUploadController       → MultipartFile, Postman upload
+5. external.config (RestClient + Properties)    → cấu hình gọi API ngoài
+6. external.service + external.controller       → JsonNode, proxy DummyJSON
+7. homework.*                                   → BT1 upload-avatar, BT2 products/category
 ```
 
 ---
@@ -77,17 +86,17 @@ demo-bai7-springmvc/
 | Thứ tự dạy | Mục | Tool test | URL / Method | File chính |
 |------------|-----|-----------|--------------|------------|
 | 1 | Cấu hình upload | — | Xem `application.properties` | `application.properties` |
-| 2 | Lưu file an toàn | — | Logic trong Service | `FileStorageService` |
-| 3 | Upload ảnh | Postman | `POST /api/files/upload` (form-data, key `file` type File) | `FileUploadController`, `FileUploadResponse` |
-| 4 | Xem ảnh upload | Browser | `GET /uploads/misc/{uuid}.jpg` | `UploadResourceConfig` |
-| 5 | Upload file sai loại | Postman | `POST /api/files/upload` (file không phải ảnh) → `400` | `FileStorageService` |
-| 6 | RestClient bean | — | Bean trong context | `RestClientConfig` |
-| 7 | Danh sách sản phẩm | Postman | `GET /api/external/products?limit=10` | `ExternalApiService`, `ExternalApiController` |
-| 8 | Categories | Postman | `GET /api/external/categories` | `ExternalApiService`, `ExternalApiController` |
-| 9 | Danh sách users | Postman | `GET /api/external/users?limit=10` | `ExternalApiService`, `ExternalApiController` |
-| 10 | User theo id | Postman | `GET /api/external/users/1` | `ExternalApiService`, `ExternalApiController` |
-| 11 | Phụ lục — upload avatar | Postman | `POST /api/files/upload-avatar` → `/uploads/avatars/...` | `FileUploadController` |
-| 12 | Phụ lục — products theo category | Postman | `GET /api/external/products/category/smartphones` | `ExternalApiService`, `ExternalApiController` |
+| 2 | Lưu file an toàn | — | Logic trong Service | `upload/service/FileStorageService` |
+| 3 | Upload ảnh | Postman | `POST /api/files/upload` (form-data, key `file` type File) | `upload/controller/FileUploadController`, `upload/dto/FileUploadResponse` |
+| 4 | Xem ảnh upload | Browser | `GET /uploads/misc/{uuid}.jpg` | `upload/config/UploadResourceConfig` |
+| 5 | Upload file sai loại | Postman | `POST /api/files/upload` (file không phải ảnh) → `400` | `upload/service/FileStorageService` |
+| 6 | RestClient bean | — | Bean trong context | `external/config/RestClientConfig` |
+| 7 | Danh sách sản phẩm | Postman | `GET /api/external/products?limit=10` | `external/service/ExternalApiService`, `external/controller/ExternalApiController` |
+| 8 | Categories | Postman | `GET /api/external/categories` | `external/service/ExternalApiService`, `external/controller/ExternalApiController` |
+| 9 | Danh sách users | Postman | `GET /api/external/users?limit=10` | `external/service/ExternalApiService`, `external/controller/ExternalApiController` |
+| 10 | User theo id | Postman | `GET /api/external/users/1` | `external/service/ExternalApiService`, `external/controller/ExternalApiController` |
+| 11 | Phụ lục — upload avatar | Postman | `POST /api/files/upload-avatar` → `/uploads/avatars/...` | `homework/controller/AvatarUploadController` |
+| 12 | Phụ lục — products theo category | Postman | `GET /api/external/products/category/smartphones` | `homework/service/HomeworkProductService`, `homework/controller/ProductCategoryController` |
 
 > **Lombok** (`@RequiredArgsConstructor`, `@Slf4j`): dùng xuyên suốt trên controller/service — xem file tương ứng.
 

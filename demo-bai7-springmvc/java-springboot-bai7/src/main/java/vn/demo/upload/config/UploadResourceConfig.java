@@ -1,4 +1,4 @@
-package vn.demo.config;
+package vn.demo.upload.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

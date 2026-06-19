@@ -1,4 +1,4 @@
-package vn.demo.dto;
+package vn.demo.upload.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

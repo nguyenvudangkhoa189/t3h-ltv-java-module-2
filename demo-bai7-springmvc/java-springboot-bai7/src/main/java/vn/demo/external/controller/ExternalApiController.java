@@ -1,4 +1,4 @@
-package vn.demo.controller.api;
+package vn.demo.external.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import lombok.RequiredArgsConstructor;
-import vn.demo.service.ExternalApiService;
+import vn.demo.external.service.ExternalApiService;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,11 +24,6 @@ public class ExternalApiController {
 			@RequestParam(defaultValue = "10") int limit
 	) {
 		return ResponseEntity.ok(externalApiService.fetchProducts(limit));
-	}
-
-	@GetMapping("/products/category/{name}")
-	public ResponseEntity<JsonNode> getProductsByCategory(@PathVariable String name) {
-		return ResponseEntity.ok(externalApiService.fetchProductsByCategory(name));
 	}
 
 	@GetMapping("/categories")
