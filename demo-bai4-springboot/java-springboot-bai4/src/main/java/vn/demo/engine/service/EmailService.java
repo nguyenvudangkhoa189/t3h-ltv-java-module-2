@@ -1,4 +1,4 @@
-package vn.demo.service;
+package vn.demo.engine.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class EmailService {
 		Context context = new Context();
 		context.setVariable("userName", userName);
 		context.setVariable("email", email);
-		String html = templateEngine.process("emails/welcome", context);
+		String html = templateEngine.process("engine/welcome-email", context);
 		log.info("Rendered welcome email for {} <{}>", userName, email);
 		return html;
 	}

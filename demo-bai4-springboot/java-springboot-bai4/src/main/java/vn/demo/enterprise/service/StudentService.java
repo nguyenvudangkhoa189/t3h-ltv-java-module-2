@@ -1,4 +1,4 @@
-package vn.demo.service;
+package vn.demo.enterprise.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
 
-import vn.demo.model.Student;
-import vn.demo.model.StudentForm;
+import vn.demo.enterprise.model.Student;
+import vn.demo.enterprise.model.StudentForm;
 
 @Service
 public class StudentService {

@@ -27,7 +27,8 @@ Sau bài này, học viên có thể:
 | 4 | Khái niệm cơ bản trong project |
 | 5 | Thực hành Hello World với Thymeleaf |
 | 6 | Cách render Thymeleaf: `@Controller` vs `SpringTemplateEngine` |
-| 7 | Lỗi thường gặp |
+| 7 | Demo đi kèm — project mẫu (chia package theo feature) |
+| 8 | Lỗi thường gặp |
 | Phụ lục | Dependencies phổ biến · Liên kết tham khảo |
 
 ---
@@ -109,9 +110,9 @@ Quarkus, Micronaut, Jakarta EE, Play Framework, Vaadin, Dropwizard, Apache Strut
 | **Project** | Maven | File cấu hình: `pom.xml` |
 | **Language** | Java | |
 | **Spring Boot** | Phiên bản ổn định mới nhất | |
-| **Group** | `com.myapp` | Tên tổ chức — thường dùng domain ngược |
-| **Artifact** | `demo` | Tên project / thư mục |
-| **Package name** | `com.myapp.demo` | Package gốc chứa class `main` — **lưu ý kỹ** |
+| **Group** | `vn.demo` | Tên tổ chức — thường dùng domain ngược |
+| **Artifact** | `demo-bai4-springboot` | Tên project / thư mục |
+| **Package name** | `vn.demo` | Package gốc chứa class `main` — **lưu ý kỹ** |
 | **Packaging** | Jar | Ứng dụng độc lập, chạy bằng `main()` |
 | **Java** | 17 hoặc 21 | Phải khớp JDK trên máy |
 | **Dependencies** | **Spring Web**, **Thymeleaf** | Đủ cho bài Hello World |
@@ -126,8 +127,8 @@ Quarkus, Micronaut, Jakarta EE, Play Framework, Vaadin, Dropwizard, Apache Strut
 4. Đợi Maven download dependency (progress bar góc dưới)
 
 ```
-src/main/java/com/myapp/demo/
-└── DemoApplication.java          ← class chứa hàm main
+src/main/java/vn/demo/
+└── DemoBai4SpringbootApplication.java   ← class chứa hàm main
 
 src/main/resources/
 └── application.properties
@@ -135,12 +136,12 @@ src/main/resources/
 
 ### 3.3. Run ứng dụng
 
-1. Mở `DemoApplication.java`
+1. Mở `DemoBai4SpringbootApplication.java`
 2. Click **Run** (tam giác xanh) cạnh hàm `main`
 3. Log thành công:
 
 ```
-Started DemoApplication in 2.345 seconds
+Started DemoBai4SpringbootApplication in 2.345 seconds
 Tomcat started on port 8080 (http)
 ```
 
@@ -163,14 +164,15 @@ Tomcat started on port 8080 (http)
 ### 4.1. Cấu trúc thư mục project
 
 ```
-demo/
+demo-bai4-springboot/
 ├── pom.xml
 ├── src/
 │   ├── main/
-│   │   ├── java/com/myapp/demo/
-│   │   │   ├── DemoApplication.java      ← hàm main
-│   │   │   └── controller/
-│   │   │       └── HelloController.java
+│   │   ├── java/vn/demo/
+│   │   │   ├── DemoBai4SpringbootApplication.java   ← hàm main
+│   │   │   └── basic/
+│   │   │       └── controller/
+│   │   │           └── HelloController.java
 │   │   └── resources/
 │   │       ├── application.properties
 │   │       ├── static/                   ← CSS, JS, hình (URL: /css/...)
@@ -179,27 +181,29 @@ demo/
 └── target/                               ← JAR build — không sửa tay
 ```
 
+> Demo gom **nhiều ví dụ** nên ngoài `basic` còn có các package `extended`, `engine`, `enterprise` — chi tiết xem **mục 7**.
+
 | Thư mục / file | Vai trò |
 |----------------|---------|
 | `src/main/java` | Code Java |
 | `src/main/resources/templates` | View Thymeleaf |
 | `src/main/resources/static` | File tĩnh — `/css/style.css` → `static/css/style.css` |
 | `pom.xml` | Dependency + cấu hình Maven |
-| `DemoApplication.java` | `@SpringBootApplication` + `main()` |
+| `DemoBai4SpringbootApplication.java` | `@SpringBootApplication` + `main()` |
 
 **Class khởi động:**
 
 ```java
 @SpringBootApplication
-public class DemoApplication {
+public class DemoBai4SpringbootApplication {
     public static void main(String[] args) {
-        SpringApplication.run(DemoApplication.class, args);
+        SpringApplication.run(DemoBai4SpringbootApplication.class, args);
     }
 }
 ```
 
 - `@SpringBootApplication` — entry point, bật autoconfiguration, quét component trong **cùng package và package con**.
-- `HelloController` phải nằm trong `com.myapp.demo.controller` — nếu không Spring **không tìm thấy**.
+- `HelloController` phải nằm trong package con của `vn.demo` (vd `vn.demo.basic.controller`) — nếu không Spring **không tìm thấy**.
 
 ### 4.2. Luồng xử lý request (Spring MVC)
 
@@ -212,8 +216,8 @@ flowchart TD
     C --> D["DispatcherServlet<br/>điều phối request"]
     D --> E["HelloController<br/>@GetMapping('/hello')"]
     E --> F["Model<br/>addAttribute('message', ...)"]
-    F --> G["return 'hello'<br/>(tên template)"]
-    G --> H["Thymeleaf<br/>render templates/hello.html + Model"]
+    F --> G["return 'basic/hello'<br/>(tên template)"]
+    G --> H["Thymeleaf<br/>render templates/basic/hello.html + Model"]
     H --> I["HTTP 200 + HTML"]
     I --> J["Trình duyệt<br/>hiển thị trang web"]
 ```
@@ -221,7 +225,7 @@ flowchart TD
 **Tóm tắt luồng:**
 
 ```
-Request:  Trình duyệt → Tomcat → DispatcherServlet → Controller → return "hello"
+Request:  Trình duyệt → Tomcat → DispatcherServlet → Controller → return "basic/hello"
 Response: Thymeleaf (render HTML) → DispatcherServlet → Tomcat → Trình duyệt
 ```
 
@@ -264,11 +268,14 @@ Tham khảo: [Spring Boot Dependencies — MVN Repository](https://mvnrepository
 **Cấu trúc cơ bản (Hello World):**
 
 ```
-com.myapp.demo/
-├── DemoApplication.java
-└── controller/
-    └── HelloController.java
+vn.demo/
+├── DemoBai4SpringbootApplication.java
+└── basic/
+    └── controller/
+        └── HelloController.java
 ```
+
+> Demo gom nhiều ví dụ nên chia package theo feature: `basic`, `extended`, `engine`, `enterprise` — xem **mục 7**.
 
 <details>
 <summary>Kiến trúc phân lớp — đã học ở Bài 3</summary>
@@ -298,7 +305,7 @@ File **`.properties`** (hoặc **`.yml`**) — cấu hình tách khỏi code.
 
 ```properties
 server.port=8080
-spring.application.name=demo-app
+spring.application.name=demo-bai4-springboot
 ```
 
 <details>
@@ -343,13 +350,15 @@ Template engine render HTML phía server — tách view khỏi controller.
 3. Controller trả tên template (không kèm `.html`)
 
 ```java
+package vn.demo.basic.controller;
+
 @Controller
 public class HelloController {
 
     @GetMapping("/hello")
     public String hello(Model model) {
         model.addAttribute("message", "Hello, World!");
-        return "hello";   // → templates/hello.html
+        return "basic/hello";   // → templates/basic/hello.html
     }
 }
 ```
@@ -364,7 +373,7 @@ public class HelloController {
 | `th:href="@{/users}"` | Link URL |
 | `th:each="item : ${items}"` | Lặp danh sách *(bài sau)* |
 
-**Quy ước:** URL `/hello`, template `hello.html`, `return "hello"` — **ba thứ độc lập**, có thể đặt tên khác nhau.
+**Quy ước:** URL `/hello`, template `basic/hello.html`, `return "basic/hello"` — **ba thứ độc lập**, có thể đặt tên khác nhau (ở đây view nằm trong thư mục con `basic/`).
 
 > Ngoài cách trên còn có cách render thủ công bằng `SpringTemplateEngine` — so sánh chi tiết tại **mục 6**.
 
@@ -378,35 +387,36 @@ public class HelloController {
 2. Trang Hello World bằng Thymeleaf, có **dữ liệu động** từ controller
 3. Truy cập được trên trình duyệt qua URL mapping
 
-> **Lưu ý đặt tên:** Ví dụ trong tài liệu dùng `demo` / `DemoApplication`. Nếu đổi Artifact, cần cập nhật **Package name**, tên class `*Application` và package trong code cho **khớp nhau** — nếu không controller có thể không được Spring quét.
+> **Lưu ý đặt tên:** Demo dùng package gốc `vn.demo` và class `DemoBai4SpringbootApplication`. Nếu Artifact / Package name của bạn khác, cần cập nhật tên class `*Application` và package trong code cho **khớp nhau** — controller phải nằm trong package con của class `*Application` thì Spring mới quét được.
 
 ### Các bước thực hiện
 
 1. Tạo project trên [start.spring.io](https://start.spring.io/) — chọn **Spring Web**, **Thymeleaf** (mục 3.1)
 2. Mở project bằng IntelliJ, kiểm tra JDK (mục 3.2)
-3. Chuột phải package gốc (vd: `com.myapp.demo`) → **New → Package** → nhập `controller`
-4. Chuột phải package `controller` → **New → Java Class** → `HelloController`
-5. Chuột phải `src/main/resources` → **New → Directory** → `templates` (nếu chưa có)
-6. Chuột phải `templates` → **New → File** → `hello.html`
+3. Chuột phải package gốc (vd: `vn.demo`) → **New → Package** → nhập `basic.controller`
+4. Chuột phải package `basic.controller` → **New → Java Class** → `HelloController`
+5. Chuột phải `src/main/resources/templates` → **New → Directory** → `basic` (nếu chưa có)
+6. Chuột phải `templates/basic` → **New → File** → `hello.html`
 7. Viết code controller và HTML (mẫu bên dưới)
-8. Run `DemoApplication.java` → mở **http://localhost:8080/hello**
+8. Run `DemoBai4SpringbootApplication.java` → mở **http://localhost:8080/hello**
 
 ### Cấu trúc project
 
 ```
-src/main/java/com/myapp/demo/
-├── DemoApplication.java
-└── controller/
-    └── HelloController.java
+src/main/java/vn/demo/
+├── DemoBai4SpringbootApplication.java
+└── basic/
+    └── controller/
+        └── HelloController.java
 
-src/main/resources/templates/
+src/main/resources/templates/basic/
 └── hello.html
 ```
 
 ### HelloController.java
 
 ```java
-package com.myapp.demo.controller;
+package vn.demo.basic.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -420,7 +430,7 @@ public class HelloController {
         model.addAttribute("title", "Thymeleaf Hello World");
         model.addAttribute("studentName", "Nguyễn Văn A");   // đổi thành tên bạn
         model.addAttribute("message", "Xin chào từ Spring Boot!");
-        return "hello";
+        return "basic/hello";
     }
 }
 ```
@@ -446,21 +456,51 @@ public class HelloController {
 
 ### Chạy và kiểm tra
 
-1. Run `DemoApplication.java`
+1. Run `DemoBai4SpringbootApplication.java`
 2. Mở **http://localhost:8080/hello**
 3. Kiểm tra tên và message hiển thị đúng
 
 ### Bài mở rộng *(tuỳ chọn)*
 
-- Redirect trang chủ: `@GetMapping("/")` + `return "redirect:/hello";`
-- Thêm file CSS trong `static/css/style.css` và link vào `hello.html`
+Ba mở rộng dưới đây được demo triển khai trong package **`vn.demo.extended`** (`HelloStyleController` + `templates/extended/hello-style.html`):
+
+- Redirect trang chủ: `@GetMapping("/")` + `return "redirect:/hello-style";`
+- Thêm file CSS trong `static/css/style.css` và link bằng `th:href="@{/css/style.css}"`
 - Hiển thị thời gian: `model.addAttribute("now", LocalDateTime.now())` + `th:text="${now}"` *(cần `import java.time.LocalDateTime`)*
+
+```java
+package vn.demo.extended.controller;
+
+import java.time.LocalDateTime;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class HelloStyleController {
+
+    @GetMapping("/")
+    public String home() {
+        return "redirect:/hello-style";
+    }
+
+    @GetMapping("/hello-style")
+    public String helloStyle(Model model) {
+        model.addAttribute("title", "Hello World có CSS & thời gian");
+        model.addAttribute("studentName", "Nguyễn Văn A");
+        model.addAttribute("message", "Xin chào từ Spring Boot!");
+        model.addAttribute("now", LocalDateTime.now());
+        return "extended/hello-style";
+    }
+}
+```
 
 ---
 
 ## 6. Cách render Thymeleaf: `@Controller` vs `SpringTemplateEngine`
 
-Sau khi làm Hello World (mục 5), ta đã dùng **Cách 1**: `@Controller` + `return "hello"` — Spring MVC tự render template. Ngoài ra còn **Cách 2**: inject `SpringTemplateEngine` và gọi `templateEngine.process(...)` để tự render HTML trong code.
+Sau khi làm Hello World (mục 5), ta đã dùng **Cách 1**: `@Controller` + `return "basic/hello"` — Spring MVC tự render template. Ngoài ra còn **Cách 2**: inject `SpringTemplateEngine` và gọi `templateEngine.process(...)` để tự render HTML trong code.
 
 > **Mục tiêu mục này:** Hiểu cả hai cách, biết vì sao Cách 1 là chuẩn cho trang web, và khi nào Cách 2 mới phù hợp trong môi trường doanh nghiệp.
 
@@ -469,13 +509,15 @@ Sau khi làm Hello World (mục 5), ta đã dùng **Cách 1**: `@Controller` + `
 *(Đã thực hành ở mục 4.7 và 5.)*
 
 ```java
+package vn.demo.basic.controller;
+
 @Controller
 public class HelloController {
 
     @GetMapping("/hello")
     public String hello(Model model) {
         model.addAttribute("message", "Hello, World!");
-        return "hello";   // Spring MVC + ThymeleafViewResolver render templates/hello.html
+        return "basic/hello";   // Spring MVC + ThymeleafViewResolver render templates/basic/hello.html
     }
 }
 ```
@@ -485,25 +527,36 @@ Controller chỉ trả **tên view logic**; framework lo phần render.
 ### 6.2. Cách 2 — `SpringTemplateEngine.process()` *(render thủ công)*
 
 ```java
+package vn.demo.engine.controller;
+
 @RestController
-public class HelloController {
+@RequestMapping("/demo")
+public class EngineDemoController {
 
     private final SpringTemplateEngine templateEngine;
+    private final EmailService emailService;
 
-    public HelloController(SpringTemplateEngine templateEngine) {
+    public EngineDemoController(SpringTemplateEngine templateEngine, EmailService emailService) {
         this.templateEngine = templateEngine;
+        this.emailService = emailService;
     }
 
-    @GetMapping(value = "/hello", produces = MediaType.TEXT_HTML_VALUE)
-    public String pageHello() {
+    @GetMapping(value = "/engine/hello", produces = MediaType.TEXT_HTML_VALUE)
+    public String engineHello() {
         Context context = new Context();
-        context.setVariable("message", "Hello, World!");
-        return templateEngine.process("hello", context);   // trả chuỗi HTML đã render
+        context.setVariable("title", "Render bằng SpringTemplateEngine");
+        context.setVariable("studentName", "Nguyễn Văn A");
+        context.setVariable("message", "HTML được render thủ công qua templateEngine.process()");
+        return templateEngine.process("engine/hello", context);   // trả chuỗi HTML đã render
     }
+
+    // ... emailPreview() dùng EmailService — xem mục 6.6
 }
 ```
 
 Developer **tự tạo `Context`**, gọi engine và trả **chuỗi HTML** — không qua cơ chế ViewResolver của Spring MVC.
+
+> **Trong demo:** App đã có `@Controller` map `/hello` (mục 5), nên endpoint Cách 2 dùng đường dẫn riêng **`/demo/engine/hello`** để tránh trùng mapping — hai handler không thể cùng map `/hello`. Template render cũng đặt riêng là `engine/hello`.
 
 ### 6.3. So sánh hai cách
 
@@ -533,6 +586,8 @@ Cách 2 **vẫn chạy được** trên trình duyệt, nhưng **không phải p
 ### 6.5. Enterprise best practice — trang web Thymeleaf
 
 ```java
+package vn.demo.enterprise.controller;
+
 @Controller
 @RequestMapping("/students")
 public class StudentController {
@@ -543,20 +598,32 @@ public class StudentController {
         this.studentService = studentService;   // constructor injection — chuẩn enterprise
     }
 
+    @GetMapping
+    public String list(Model model) {
+        model.addAttribute("students", studentService.findAll());
+        return "enterprise/students/list";
+    }
+
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
         model.addAttribute("student", studentService.findById(id));
-        return "students/detail";   // → templates/students/detail.html
+        return "enterprise/students/detail";   // → templates/enterprise/students/detail.html
+    }
+
+    @GetMapping("/new")
+    public String showForm(Model model) {
+        model.addAttribute("form", new StudentForm());
+        return "enterprise/students/form";
     }
 
     @PostMapping
     public String create(@Valid @ModelAttribute("form") StudentForm form,
                          BindingResult result) {
         if (result.hasErrors()) {
-            return "students/form";            // quay lại form khi lỗi validation
+            return "enterprise/students/form";     // quay lại form khi lỗi validation
         }
         studentService.save(form);
-        return "redirect:/students";           // Post-Redirect-Get pattern
+        return "redirect:/students";               // Post-Redirect-Get pattern
     }
 }
 ```
@@ -601,22 +668,37 @@ HTTP Request
 | **Test unit** | Kiểm tra nội dung template mà không khởi động web server |
 
 ```java
+package vn.demo.engine.service;
+
 @Service
 public class EmailService {
 
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
+
     private final SpringTemplateEngine templateEngine;
-    private final JavaMailSender mailSender;
 
-    public void sendWelcomeEmail(User user) {
+    public EmailService(SpringTemplateEngine templateEngine) {
+        this.templateEngine = templateEngine;
+    }
+
+    public String renderWelcomeEmail(String userName, String email) {
         Context context = new Context();
-        context.setVariable("userName", user.getName());
-        String html = templateEngine.process("emails/welcome", context);
+        context.setVariable("userName", userName);
+        context.setVariable("email", email);
+        String html = templateEngine.process("engine/welcome-email", context);
+        log.info("Rendered welcome email for {} <{}>", userName, email);
+        return html;   // chuỗi HTML — KHÔNG phải HTTP response
+    }
 
-        // gửi email với html — không phải HTTP response
-        mailSender.send(buildMessage(user.getEmail(), html));
+    public void sendWelcomeEmail(String userName, String email) {
+        String html = renderWelcomeEmail(userName, email);
+        // Demo chỉ log; production sẽ inject JavaMailSender để gửi thật
+        log.info("Demo: would send email to {} with {} bytes HTML", email, html.length());
     }
 }
 ```
+
+> **Trong demo:** `EmailService` render template `engine/welcome-email` và có endpoint xem trước `/demo/email/preview` (chỉ render HTML, không gửi mail thật) để minh hoạ `process()` chạy trong **Service**. Ở production, inject thêm `JavaMailSender` để gửi email với chuỗi HTML này.
 
 ### 6.7. Tóm tắt — chọn cách nào?
 
@@ -628,14 +710,47 @@ public class EmailService {
 
 ---
 
-## 7. Lỗi thường gặp
+## 7. Demo đi kèm — Project mẫu
+
+Toàn bộ ví dụ trong bài được gom vào một project chạy được: [`demo-bai4-springboot/java-springboot-bai4`](../../demo-bai4-springboot/java-springboot-bai4).
+
+Vì project chứa **nhiều ví dụ**, code được **chia package theo từng phần demo** (feature-based). Nhìn vào package là biết minh hoạ mục nào — `basic` ở mục 5 chính là một trong các package này.
+
+| Package | Mục trong bài | Demo gì |
+|---------|---------------|---------|
+| `vn.demo.basic` | Mục 5 | Hello World cơ bản — `@Controller` + Thymeleaf (Cách 1) |
+| `vn.demo.extended` | Mục 5 — Bài mở rộng | Redirect trang chủ + CSS tĩnh + `LocalDateTime` |
+| `vn.demo.engine` | Mục 6.2 / 6.6 | `SpringTemplateEngine.process()` (Cách 2) + email trong Service |
+| `vn.demo.enterprise` | Mục 6.5 | `@Controller` + Service + validation + Post-Redirect-Get |
+
+> **Lưu ý:** Với app chỉ có Hello World, một package `controller` là đủ. Demo gom **nhiều ví dụ** nên chia theo feature (`basic`, `extended`, `engine`, `enterprise`) — phần Hello World ở mục 5 chính là package `basic`.
+
+**View name khớp thư mục template** (vd `return "basic/hello"` → `templates/basic/hello.html`). File tĩnh dùng chung ở `static/css/style.css`.
+
+### URL trong demo
+
+| Package | URL / Method | File chính |
+|---------|--------------|------------|
+| `basic` | `GET /hello` | `HelloController` → `templates/basic/hello.html` |
+| `extended` | `GET /` → redirect `/hello-style` | `HelloStyleController` |
+| `extended` | `GET /hello-style` | `HelloStyleController` → `templates/extended/hello-style.html` |
+| `engine` | `GET /demo/engine/hello` | `EngineDemoController` → `templates/engine/hello.html` |
+| `engine` | `GET /demo/email/preview` | `EmailService` → `templates/engine/welcome-email.html` |
+| `enterprise` | `GET /students` · `/students/{id}` · `/students/new` | `StudentController`, `StudentService` |
+| `enterprise` | `POST /students` → redirect `/students` | `StudentController` (validation + Post-Redirect-Get) |
+
+> Chi tiết cách chạy và bảng URL đầy đủ: xem [README của demo](../../demo-bai4-springboot/java-springboot-bai4/README.md).
+
+---
+
+## 8. Lỗi thường gặp
 
 | Triệu chứng | Nguyên nhân | Cách xử lý |
 |-------------|-------------|------------|
 | **404 Not Found** | URL sai / chưa mapping | Kiểm tra `@GetMapping("/hello")` và URL trình duyệt |
 | **Whitelabel Error Page** | Server chạy, chưa có route `/` | Bình thường — truy cập `/hello` |
 | **Controller không chạy** | Ngoài package scan | Controller phải trong package con của `*Application` |
-| **Template not found** | Sai tên / sai thư mục | `templates/hello.html` ↔ `return "hello"` |
+| **Template not found** | Sai tên / sai thư mục | `templates/basic/hello.html` ↔ `return "basic/hello"` |
 | **500 Internal Server Error** | Lỗi code hoặc Thymeleaf | Kiểm tra tên biến `${...}` khớp `model.addAttribute(...)` |
 | **Port 8080 in use** | Port bị chiếm | `server.port=8081` |
 | **Cannot resolve symbol** | Maven chưa reload | `pom.xml` → Maven → Reload project |
@@ -681,3 +796,4 @@ public class EmailService {
 - [Spring Boot Documentation](https://docs.spring.io/spring-boot/index.html)
 - [Thymeleaf + Spring](https://www.thymeleaf.org/doc/tutorials/3.1/thymeleafspring.html)
 - [MVN Repository — Spring Boot Dependencies](https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies/3.5.3)
+- [Project demo bài 4 — chia package theo feature](../../demo-bai4-springboot/java-springboot-bai4/README.md)

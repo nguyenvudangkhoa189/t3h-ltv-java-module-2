@@ -1,4 +1,4 @@
-package vn.demo.model;
+package vn.demo.enterprise.model;
 
 public class Student {
 

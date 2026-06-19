@@ -1,6 +1,13 @@
 # Demo Bài 4 — Spring Boot cơ bản & Thymeleaf
 
-Project demo cho syllabus `java_m2_bai4_SpringBoot.md`. Gom tất cả ví dụ trong một Spring Boot app: Hello World Thymeleaf, static CSS, hai cách render template, và enterprise pattern với `StudentController`.
+Project demo cho syllabus `java_m2_bai4_SpringBoot.md`. Code được **chia package theo từng phần demo** để dễ hình dung package nào minh hoạ mục nào trong bài.
+
+| Package | Mục syllabus | Demo gì |
+|---------|--------------|---------|
+| `vn.demo.basic` | Mục 5 | Hello World cơ bản — `@Controller` + Thymeleaf (Cách 1) |
+| `vn.demo.extended` | Mục 5 — Bài mở rộng | Redirect trang chủ + CSS tĩnh + `LocalDateTime` |
+| `vn.demo.engine` | Mục 6 | `SpringTemplateEngine.process()` (Cách 2) + email trong Service |
+| `vn.demo.enterprise` | Mục 6.5 | Enterprise best practice — DI, validation, Post-Redirect-Get |
 
 ## Chạy project
 
@@ -24,77 +31,84 @@ Hoặc Run `DemoBai4SpringbootApplication` trong IntelliJ.
 
 ---
 
-## Cấu trúc project đề xuất
+## Cấu trúc project
 
 ```
-demo-bai4-springboot/
-└── java-springboot-bai4/
-    ├── pom.xml
-    ├── mvnw
-    └── src/main/java/vn/demo/
-        ├── DemoBai4SpringbootApplication.java
-        ├── controller/
-        │   ├── HelloController.java           ← mục 5: Hello World cơ bản (Cách 1)
-        │   ├── HelloStyleController.java      ← mục 5 mở rộng: Redirect + CSS + LocalDateTime
-        │   ├── EngineDemoController.java      ← mục 6: SpringTemplateEngine (Cách 2)
-        │   └── StudentController.java         ← mục 6.5: Enterprise pattern
-        ├── service/
-        │   ├── EmailService.java              ← mục 6.6: process() trong Service (email demo)
-        │   └── StudentService.java            ← business logic in-memory
-        └── model/
-            ├── Student.java
-            └── StudentForm.java               ← validation form
-    └── src/main/resources/
+java-springboot-bai4/
+├── pom.xml
+├── mvnw
+└── src/main/
+    ├── java/vn/demo/
+    │   ├── DemoBai4SpringbootApplication.java   ← entry point (@SpringBootApplication)
+    │   │
+    │   ├── basic/                               ← Mục 5: Hello World cơ bản
+    │   │   └── controller/HelloController.java
+    │   │
+    │   ├── extended/                            ← Mục 5 mở rộng: redirect + CSS + thời gian
+    │   │   └── controller/HelloStyleController.java
+    │   │
+    │   ├── engine/                              ← Mục 6: SpringTemplateEngine (Cách 2)
+    │   │   ├── controller/EngineDemoController.java
+    │   │   └── service/EmailService.java
+    │   │
+    │   └── enterprise/                          ← Mục 6.5: enterprise best practice
+    │       ├── controller/StudentController.java
+    │       ├── service/StudentService.java
+    │       └── model/
+    │           ├── Student.java
+    │           └── StudentForm.java
+    │
+    └── resources/
         ├── application.properties
-        ├── static/css/style.css               ← file tĩnh (/css/style.css)
-        └── templates/
-            ├── hello.html                     ← Hello cơ bản
-            ├── hello-style.html               ← Hello có CSS + thời gian
-            ├── emails/
-            │   └── welcome.html               ← template email (EngineDemo / EmailService)
-            └── students/
+        ├── static/css/style.css                 ← file tĩnh dùng chung (/css/style.css)
+        └── templates/                           ← mỗi feature một thư mục con
+            ├── basic/hello.html
+            ├── extended/hello-style.html
+            ├── engine/
+            │   ├── hello.html                   ← template cho process() demo
+            │   └── welcome-email.html           ← template email (EmailService)
+            └── enterprise/students/
                 ├── list.html
                 ├── detail.html
-                └── form.html                  ← th:field, th:errors
+                └── form.html
 ```
 
-### Phân tách package
+> `@SpringBootApplication` nằm ở `vn.demo` nên quét được toàn bộ package con (`basic`, `extended`, `engine`, `enterprise`). View name trả về khớp thư mục template, ví dụ `return "basic/hello"` → `templates/basic/hello.html`.
 
-| Package | Vai trò |
-|---------|---------|
-| `controller/` | `@Controller` — trả view Thymeleaf; `@RestController` — demo render HTML thủ công |
+### Quy ước trong mỗi package
+
+| Sub-package | Vai trò |
+|-------------|---------|
+| `controller/` | `@Controller` (trả view) hoặc `@RestController` (engine demo) |
 | `service/` | Business logic, `@Service`, inject qua constructor |
 | `model/` | Dữ liệu hiển thị / form object |
 
 ### Luồng dạy gợi ý
 
 ```
-1. DemoBai4SpringbootApplication + Whitelabel   → chạy server, chưa có route /
-2. HelloController + hello.html                 → @Controller + Model + Thymeleaf (Cách 1)
-3. HelloStyleController + hello-style.html      → redirect, static CSS, LocalDateTime
-4. EngineDemoController                         → SpringTemplateEngine.process() (Cách 2)
-5. EmailService + emails/welcome.html           → process() trong Service, không qua ViewResolver
-6. StudentController + StudentService           → enterprise: DI, validation, redirect sau POST
+1. basic       → @Controller + Model + Thymeleaf (Cách 1)
+2. extended    → redirect, static CSS, LocalDateTime
+3. engine      → SpringTemplateEngine.process() (Cách 2) + email trong Service
+4. enterprise  → DI, validation, redirect sau POST
 ```
 
 ---
 
 ## Bảng URL demo — tra nhanh khi dạy
 
-| Thứ tự dạy | Mục | Tool test | URL / Method | File chính |
-|------------|-----|-----------|--------------|------------|
-| 1 | Khởi động server | Browser | `GET /` → Whitelabel hoặc redirect | `DemoBai4SpringbootApplication` |
-| 2 | Hello World cơ bản | Browser | `GET /hello` | `HelloController`, `templates/hello.html` |
-| 3 | Redirect trang chủ | Browser | `GET /` → redirect `/hello-style` | `HelloStyleController` |
-| 4 | CSS + thời gian động | Browser | `GET /hello-style` | `HelloStyleController`, `static/css/style.css` |
-| 5 | Render thủ công (Cách 2) | Browser | `GET /demo/engine/hello` | `EngineDemoController` |
-| 6 | Email template trong Service | Browser | `GET /demo/email/preview` | `EmailService`, `templates/emails/welcome.html` |
-| 7 | Danh sách sinh viên | Browser | `GET /students` | `StudentController`, `StudentService` |
-| 8 | Chi tiết sinh viên | Browser | `GET /students/1` | `StudentController`, `templates/students/detail.html` |
-| 9 | Form + validation | Browser | `GET /students/new` → submit form | `StudentForm`, `templates/students/form.html` |
-| 10 | Post-Redirect-Get | Browser | `POST /students` → redirect `/students` | `StudentController` |
+| # | Package | Tool test | URL / Method | File chính |
+|---|---------|-----------|--------------|------------|
+| 1 | `basic` | Browser | `GET /hello` | `HelloController`, `templates/basic/hello.html` |
+| 2 | `extended` | Browser | `GET /` → redirect `/hello-style` | `HelloStyleController` |
+| 3 | `extended` | Browser | `GET /hello-style` | `HelloStyleController`, `static/css/style.css` |
+| 4 | `engine` | Browser | `GET /demo/engine/hello` | `EngineDemoController`, `templates/engine/hello.html` |
+| 5 | `engine` | Browser | `GET /demo/email/preview` | `EmailService`, `templates/engine/welcome-email.html` |
+| 6 | `enterprise` | Browser | `GET /students` | `StudentController`, `StudentService` |
+| 7 | `enterprise` | Browser | `GET /students/1` | `StudentController`, `templates/enterprise/students/detail.html` |
+| 8 | `enterprise` | Browser | `GET /students/new` → submit form | `StudentForm`, `templates/enterprise/students/form.html` |
+| 9 | `enterprise` | Browser | `POST /students` → redirect `/students` | `StudentController` |
 
-> **Hai cách render Thymeleaf:** Trang web SSR → `@Controller` + `return "view-name"` (Cách 1). Email / job nền → `SpringTemplateEngine.process()` trong **Service** (Cách 2).
+> **Hai cách render Thymeleaf:** Trang web SSR → `@Controller` + `return "view-name"` (package `basic`/`extended`/`enterprise`). Email / job nền → `SpringTemplateEngine.process()` trong **Service** (package `engine`).
 
 ---
 

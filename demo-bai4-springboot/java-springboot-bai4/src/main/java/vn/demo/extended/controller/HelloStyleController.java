@@ -1,4 +1,4 @@
-package vn.demo.controller;
+package vn.demo.extended.controller;
 
 import java.time.LocalDateTime;
 
@@ -20,7 +20,7 @@ public class HelloStyleController {
 		model.addAttribute("studentName", "Nguyễn Văn A");
 		model.addAttribute("message", "Xin chào từ Spring Boot!");
 		model.addAttribute("now", LocalDateTime.now());
-		return "hello-style";
+		return "extended/hello-style";
 	}
 
 }

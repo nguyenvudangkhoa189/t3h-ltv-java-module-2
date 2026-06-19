@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${title}">Hello</title>
+</head>
+<body>
+    <h1 th:text="${title}">Render bằng SpringTemplateEngine</h1>
+    <p>Xin chào, <strong th:text="${studentName}">Tên</strong>!</p>
+    <p th:text="${message}">Message</p>
+</body>
+</html>

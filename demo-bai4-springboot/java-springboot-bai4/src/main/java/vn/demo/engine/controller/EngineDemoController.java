@@ -1,4 +1,4 @@
-package vn.demo.controller;
+package vn.demo.engine.controller;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import vn.demo.service.EmailService;
+import vn.demo.engine.service.EmailService;
 
 @RestController
 @RequestMapping("/demo")
@@ -27,7 +27,7 @@ public class EngineDemoController {
 		context.setVariable("title", "Render bằng SpringTemplateEngine");
 		context.setVariable("studentName", "Nguyễn Văn A");
 		context.setVariable("message", "HTML được render thủ công qua templateEngine.process()");
-		return templateEngine.process("hello", context);
+		return templateEngine.process("engine/hello", context);
 	}
 
 	@GetMapping(value = "/email/preview", produces = MediaType.TEXT_HTML_VALUE)

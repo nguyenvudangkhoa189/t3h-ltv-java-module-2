@@ -1,4 +1,4 @@
-package vn.demo.controller;
+package vn.demo.basic.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,7 +12,7 @@ public class HelloController {
 		model.addAttribute("title", "Thymeleaf Hello World");
 		model.addAttribute("studentName", "Nguyễn Văn A");
 		model.addAttribute("message", "Xin chào từ Spring Boot!");
-		return "hello";
+		return "basic/hello";
 	}
 
 }
