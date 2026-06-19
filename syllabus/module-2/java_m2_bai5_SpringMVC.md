@@ -146,13 +146,13 @@ flowchart TD
 **Ví dụ `@RestController`:**
 
 ```java
-package com.myapp.demo.controller;
+package vn.demo.get.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class ProductController {
+public class ProductQueryController {
 
     @GetMapping("/api/v1/products")
     public String hello() {
@@ -163,17 +163,36 @@ public class ProductController {
 
 ### Cấu trúc package gợi ý
 
+Demo bài này chia package **theo HTTP method** — mỗi method một package, tự chứa `controller` + `dto`. Nhìn tên package biết ngay đang học method nào:
+
 ```
-com.myapp.demo/
+vn.demo/
 ├── DemoApplication.java
-├── controller/
-│   └── ProductController.java
-└── dto/
-    ├── ProductRequest.java
-    └── ProductPatchRequest.java
+├── get/                              ← §7 GET API
+│   ├── controller/
+│   │   ├── ProductQueryController.java
+│   │   ├── NewsController.java
+│   │   └── UserQueryController.java
+│   └── dto/NewsDto.java
+├── post/                             ← §8 POST API
+│   ├── controller/{ProductCreateController, CategoryCreateController}.java
+│   └── dto/{ProductRequest, GameCreateRequest}.java
+├── put/                              ← §9 PUT API
+│   ├── controller/{CategoryUpdateController, UserUpdateController}.java
+│   └── dto/{CategoryRequest, UserProfileRequest}.java
+├── patch/                            ← §10 PATCH API
+│   ├── controller/{ProductPatchController, UserPatchController}.java
+│   └── dto/{ProductPatchRequest, UserPatchRequest}.java
+├── delete/                           ← §11 DELETE API
+│   └── controller/{OrderController, SongController}.java
+└── capstone/                         ← Phụ lục: Bài tập tổng hợp (books)
+    ├── controller/BookController.java
+    ├── dto/{BookRequest, BookPatchRequest}.java
+    ├── model/Book.java
+    └── service/BookService.java
 ```
 
-> **Quy ước:** Tách class nhận dữ liệu từ client vào package `dto` (Data Transfer Object).
+> **Quy ước:** Tách class nhận dữ liệu từ client vào package `dto` (Data Transfer Object). Mỗi package method tự chứa `controller` + `dto` riêng để không phụ thuộc chéo.
 
 ---
 
@@ -310,7 +329,7 @@ Một số hành động không map sạch sang CRUD — dùng **sub-resource d�
 ### 7.2. Ví dụ 1 — Lấy danh sách
 
 ```java
-package com.myapp.demo.controller;
+package vn.demo.get.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -321,7 +340,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-public class ProductController {
+public class ProductQueryController {
 
     @GetMapping("/api/v1/products")
     public ResponseEntity<List<String>> getAllProducts() {
@@ -426,10 +445,10 @@ Có **hai cách** trả dữ liệu object từ API — đều cho kết quả J
 
 Phù hợp khi API **luôn thành công** và status mặc định `200 OK` là đủ.
 
-**Bước 1 — Tạo class DTO** (`dto/NewsDto.java`):
+**Bước 1 — Tạo class DTO** (`get/dto/NewsDto.java`):
 
 ```java
-package com.myapp.demo.dto;
+package vn.demo.get.dto;
 
 public class NewsDto {
     private String name;
@@ -449,12 +468,12 @@ public class NewsDto {
 
 > **Lưu ý:** Jackson serialize object qua **getter** (`getName`, `getAge`). Thiếu getter → field không xuất hiện trong JSON.
 
-**Bước 2 — Controller trả object trực tiếp** (`controller/NewsController.java`):
+**Bước 2 — Controller trả object trực tiếp** (`get/controller/NewsController.java`):
 
 ```java
-package com.myapp.demo.controller;
+package vn.demo.get.controller;
 
-import com.myapp.demo.dto.NewsDto;
+import vn.demo.get.dto.NewsDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -488,7 +507,7 @@ Content-Type: application/json
 Phù hợp khi cần **chỉ định HTTP status**, **headers**, hoặc trả `404` / `204` tùy logic.
 
 ```java
-import com.myapp.demo.dto.NewsDto;
+import vn.demo.get.dto.NewsDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -568,12 +587,12 @@ produces = MediaType.APPLICATION_JSON_VALUE
 
 **Ý nghĩa:** Báo cho Spring và client biết response của API này có định dạng `application/json`.
 
-**Controller đầy đủ** (`controller/NewsController.java`):
+**Controller đầy đủ** (`get/controller/NewsController.java`):
 
 ```java
-package com.myapp.demo.controller;
+package vn.demo.get.controller;
 
-import com.myapp.demo.dto.NewsDto;
+import vn.demo.get.dto.NewsDto;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -642,10 +661,10 @@ public ResponseEntity<Void> createProductFromForm(
 
 ### 8.3. Ví dụ 2 — Nhận dữ liệu từ JSON body
 
-Tạo DTO:
+Tạo DTO (`post/dto/ProductRequest.java`):
 
 ```java
-package com.myapp.demo.dto;
+package vn.demo.post.dto;
 
 public class ProductRequest {
     private String name;
@@ -664,7 +683,7 @@ public class ProductRequest {
 Controller:
 
 ```java
-import com.myapp.demo.dto.ProductRequest;
+import vn.demo.post.dto.ProductRequest;
 
 @PostMapping("/api/v1/products/json")
 public ResponseEntity<ProductRequest> createProductFromBody(
@@ -692,9 +711,11 @@ Header: `Content-Type: application/json`
 1. Tạo `POST /api/v1/categories` — nhận `name` (bắt buộc) và `location` (không bắt buộc) từ **form**. In giá trị ra console.
 2. Tạo `POST /api/v1/games` — nhận `name` (string), `price` (double), `platform` (string) từ **JSON body**. In giá trị ra console.
 
-**Gợi ý DTO cho bài 2:**
+**Gợi ý DTO cho bài 2** (`post/dto/GameCreateRequest.java`):
 
 ```java
+package vn.demo.post.dto;
+
 public class GameCreateRequest {
     private String name;
     private double price;
@@ -735,11 +756,34 @@ public ResponseEntity<Void> updateCategoryFromForm(
 
 ### 9.3. Ví dụ 2 — Cập nhật qua JSON body
 
+Tạo DTO (`put/dto/CategoryRequest.java`):
+
 ```java
+package vn.demo.put.dto;
+
+public class CategoryRequest {
+    private String name;
+    private String description;
+    private String status;
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+}
+```
+
+Controller:
+
+```java
+import vn.demo.put.dto.CategoryRequest;
+
 @PutMapping("/api/v1/categories/{id}/json")
-public ResponseEntity<ProductRequest> updateCategoryFromBody(
+public ResponseEntity<CategoryRequest> updateCategoryFromBody(
         @PathVariable String id,
-        @RequestBody ProductRequest request
+        @RequestBody CategoryRequest request
 ) {
     System.out.println("Update category " + id + ": " + request.getName());
     return ResponseEntity.ok(request);
@@ -751,8 +795,8 @@ public ResponseEntity<ProductRequest> updateCategoryFromBody(
 ```json
 {
   "name": "Electronics",
-  "price": 0,
-  "color": "blue"
+  "description": "Đồ điện tử",
+  "status": "active"
 }
 ```
 
@@ -784,7 +828,7 @@ public ResponseEntity<ProductRequest> updateCategoryFromBody(
 Tạo DTO chỉ chứa field cần cập nhật (tất cả optional):
 
 ```java
-package com.myapp.demo.dto;
+package vn.demo.patch.dto;
 
 public class ProductPatchRequest {
     private String name;
@@ -803,7 +847,7 @@ public class ProductPatchRequest {
 Controller:
 
 ```java
-import com.myapp.demo.dto.ProductPatchRequest;
+import vn.demo.patch.dto.ProductPatchRequest;
 
 @PatchMapping("/api/v1/products/{id}")
 public ResponseEntity<ProductPatchRequest> patchProduct(
@@ -1020,9 +1064,11 @@ public ResponseEntity<List<Book>> searchBooks(
 | `GET /api/v1/books/search?author=Robert C. Martin&title=Clean` | `200` — lọc thêm theo tên sách |
 | `GET /api/v1/books/search` | `400` — thiếu `author` bắt buộc |
 
-**Gợi ý DTO:**
+**Gợi ý DTO** (`capstone/dto/`):
 
 ```java
+package vn.demo.capstone.dto;
+
 public class BookRequest {
     private String title;
     private String author;
@@ -1038,7 +1084,7 @@ public class BookPatchRequest {
 }
 ```
 
-Dữ liệu có thể lưu tạm trong `List` trong memory hoặc chỉ in log — persistence học ở bài sau.
+Dữ liệu có thể lưu tạm trong `List` trong memory (`capstone/service/BookService.java`) hoặc chỉ in log — persistence học ở bài sau.
 
 ### Checklist trước khi nộp bài
 

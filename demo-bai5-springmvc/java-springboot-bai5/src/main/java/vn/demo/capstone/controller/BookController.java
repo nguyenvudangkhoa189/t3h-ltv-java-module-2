@@ -1,4 +1,4 @@
-package vn.demo.controller.api;
+package vn.demo.capstone.controller;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,18 +16,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import vn.demo.dto.BookPatchRequest;
-import vn.demo.dto.BookRequest;
-import vn.demo.model.Book;
-import vn.demo.service.BookService;
+import vn.demo.capstone.dto.BookPatchRequest;
+import vn.demo.capstone.dto.BookRequest;
+import vn.demo.capstone.model.Book;
+import vn.demo.capstone.service.BookService;
 
 @RestController
 @RequestMapping("/api/v1/books")
-public class BookApiController {
+public class BookController {
 
 	private final BookService bookService;
 
-	public BookApiController(BookService bookService) {
+	public BookController(BookService bookService) {
 		this.bookService = bookService;
 	}
 

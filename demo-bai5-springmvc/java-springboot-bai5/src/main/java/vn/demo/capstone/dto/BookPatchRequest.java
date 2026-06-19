@@ -1,6 +1,6 @@
-package vn.demo.dto;
+package vn.demo.capstone.dto;
 
-public class BookRequest {
+public class BookPatchRequest {
 
 	private String title;
 	private String author;

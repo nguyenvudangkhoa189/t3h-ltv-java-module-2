@@ -1,4 +1,4 @@
-package vn.demo.dto;
+package vn.demo.get.dto;
 
 public class NewsDto {
 

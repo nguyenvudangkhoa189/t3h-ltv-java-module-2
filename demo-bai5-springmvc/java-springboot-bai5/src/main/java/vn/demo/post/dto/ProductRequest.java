@@ -1,6 +1,6 @@
-package vn.demo.dto;
+package vn.demo.post.dto;
 
-public class ProductPatchRequest {
+public class ProductRequest {
 
 	private String name;
 	private Double price;

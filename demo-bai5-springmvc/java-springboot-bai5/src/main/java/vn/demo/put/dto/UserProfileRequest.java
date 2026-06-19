@@ -1,4 +1,4 @@
-package vn.demo.dto;
+package vn.demo.put.dto;
 
 public class UserProfileRequest {
 

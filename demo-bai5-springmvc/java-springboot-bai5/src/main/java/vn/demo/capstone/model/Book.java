@@ -1,10 +1,26 @@
-package vn.demo.dto;
+package vn.demo.capstone.model;
 
-public class BookPatchRequest {
+public class Book {
 
+	private Long id;
 	private String title;
 	private String author;
 	private Double price;
+
+	public Book(Long id, String title, String author, Double price) {
+		this.id = id;
+		this.title = title;
+		this.author = author;
+		this.price = price;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public String getTitle() {
 		return title;

@@ -1,4 +1,4 @@
-package vn.demo.service;
+package vn.demo.capstone.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
 
-import vn.demo.dto.BookPatchRequest;
-import vn.demo.dto.BookRequest;
-import vn.demo.model.Book;
+import vn.demo.capstone.dto.BookPatchRequest;
+import vn.demo.capstone.dto.BookRequest;
+import vn.demo.capstone.model.Book;
 
 @Service
 public class BookService {

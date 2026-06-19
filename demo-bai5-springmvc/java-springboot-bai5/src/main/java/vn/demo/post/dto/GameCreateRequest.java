@@ -1,4 +1,4 @@
-package vn.demo.dto;
+package vn.demo.post.dto;
 
 public class GameCreateRequest {
 
