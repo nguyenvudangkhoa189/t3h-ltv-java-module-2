@@ -83,14 +83,31 @@ Controllers
 
 ### Cấu trúc package gợi ý
 
+Project demo bài này **chia package theo từng phần (feature-based)** — mỗi phần demo nằm trong một package riêng, bên trong vẫn tách lớp `controller` / `service` / `model` / `repository`. Cách này giúp nhìn package là biết đang demo cho mục nào.
+
 ```
-src/main/java/com/example/demo/
-├── DemoApplication.java
-├── controller/          ← AccountController, ProductController
-├── service/             ← AccountService, OrderService
-├── repository/          ← AccountRepository (bài JPA — tạm thời có thể bỏ qua)
-└── model/               ← Account, Product (DTO / Entity)
+src/main/java/vn/demo/
+├── DemoBai6SpringmvcApplication.java
+├── servicelayer/        ← mục 1-3: @Service, DI, gọi liên thông Service
+│   ├── controller/      ← AccountController
+│   ├── service/         ← AccountService, OrderService
+│   ├── repository/      ← AccountRepository (bài JPA — tạm thời có thể bỏ qua)
+│   └── model/           ← Account
+├── validation/          ← mục 5-7: Bean Validation cho REST + Thymeleaf
+│   ├── controller/      ← FormApiController, RegisterController
+│   └── model/           ← Account (có annotation validation)
+├── grouping/            ← mục 8: nhóm API bằng @RequestMapping
+│   └── controller/      ← DemoController
+├── header/              ← mục 9: đọc HTTP Header bằng @RequestHeader
+│   └── controller/      ← ProductController
+└── homework/            ← phụ lục: bài tập tổng hợp
+    ├── controller/      ← ProductController, BookApiController, BookWebController, MeController
+    ├── service/         ← ProductService, BookService
+    ├── model/           ← Book
+    └── dto/             ← BookRequest, MeResponse
 ```
+
+> **Lombok** (mục 4) là kỹ thuật xuyên suốt — dùng trong mọi package (`@Data`, `@RequiredArgsConstructor`), không tách riêng.
 
 ---
 
@@ -102,10 +119,10 @@ src/main/java/com/example/demo/
 - Đặt tên theo mẫu `<ĐốiTượng>Service` (ví dụ `AccountService`, `OrderService`).
 
 ```java
-package com.example.demo.service;
+package vn.demo.servicelayer.service;
 
-import com.example.demo.model.Account;
-import com.example.demo.repository.AccountRepository;
+import vn.demo.servicelayer.model.Account;
+import vn.demo.servicelayer.repository.AccountRepository;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -459,7 +476,7 @@ Reload Maven sau khi thêm.
 ### 5.3. Model dùng chung cho cả REST API và Thymeleaf
 
 ```java
-package com.example.demo.model;
+package vn.demo.validation.model;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -520,9 +537,9 @@ flowchart LR
 ### 6.1. Controller
 
 ```java
-package com.example.demo.controller;
+package vn.demo.validation.controller;
 
-import com.example.demo.model.Account;
+import vn.demo.validation.model.Account;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -617,9 +634,9 @@ Với **form HTML**, luồng khác REST API: không trả JSON lỗi mà **rende
 ### 7.1. Controller
 
 ```java
-package com.example.demo.controller;
+package vn.demo.validation.controller;
 
-import com.example.demo.model.Account;
+import vn.demo.validation.model.Account;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -633,7 +650,7 @@ public class RegisterController {
     @GetMapping
     public String showForm(Model model) {
         model.addAttribute("account", new Account());   // object rỗng cho form
-        return "register/form";
+        return "validation/form";
     }
 
     @PostMapping
@@ -642,7 +659,7 @@ public class RegisterController {
             BindingResult bindingResult
     ) {
         if (bindingResult.hasErrors()) {
-            return "register/form";   // quay lại form — Thymeleaf hiển thị lỗi
+            return "validation/form";   // quay lại form — Thymeleaf hiển thị lỗi
         }
         // TODO: gọi AccountService lưu tài khoản
         return "redirect:/register/success";   // Post-Redirect-Get pattern
@@ -650,7 +667,7 @@ public class RegisterController {
 
     @GetMapping("/success")
     public String success() {
-        return "register/success";
+        return "validation/success";
     }
 }
 ```
@@ -661,7 +678,7 @@ public class RegisterController {
 |----------|-----------|
 | `@RestController` | `@Controller` |
 | `@RequestBody Account` | `@ModelAttribute("account") Account` |
-| `return ResponseEntity.badRequest().body(errors)` | `return "register/form"` |
+| `return ResponseEntity.badRequest().body(errors)` | `return "validation/form"` |
 | Client đọc JSON lỗi | Browser hiển thị HTML lỗi |
 
 ### 7.2. Dữ liệu lỗi hiển thị trên form đến từ đâu?
@@ -675,7 +692,7 @@ flowchart TD
     C --> D["@NotBlank message = Username is required ..."]
     D --> E["Lỗi ghi vào BindingResult"]
     E --> F["Controller: bindingResult.hasErrors = true"]
-    F --> G["return register/form"]
+    F --> G["return validation/form"]
     G --> H["Spring đưa account + BindingResult vào Model"]
     H --> I["Thymeleaf: th:errors đọc message từ BindingResult"]
 ```
@@ -685,7 +702,7 @@ flowchart TD
 | 1 | `@Valid` | Kích hoạt Bean Validation trên object `Account` |
 | 2 | Annotation trên field | Ví dụ `@NotBlank(message = "Username is required")` — nếu fail, tạo `FieldError` với `defaultMessage` = chuỗi trong `message` |
 | 3 | `BindingResult` | Spring gom tất cả `FieldError` vào đây *(tham số ngay sau `@Valid`)* |
-| 4 | Controller | `return "register/form"` — **không cần** tự `model.addAttribute("errors", ...)` |
+| 4 | Controller | `return "validation/form"` — **không cần** tự `model.addAttribute("errors", ...)` |
 | 5 | Spring MVC | Tự đưa `BindingResult` vào Model (key nội bộ gắn với tên `"account"`) |
 | 6 | Thymeleaf | `#fields` và `th:errors` đọc `BindingResult` → in ra đúng `message` đã khai báo trên annotation |
 
@@ -698,7 +715,7 @@ private String username;
 
 **Không phải** text tĩnh trong thẻ HTML. Chuỗi `"Username error"` trong ví dụ cũ (nếu có) chỉ là **placeholder khi mở file HTML trực tiếp** — khi server render bằng Thymeleaf, `th:errors` **thay thế** nội dung thẻ bằng message thật từ `BindingResult`.
 
-### 7.3. Template Thymeleaf — `templates/register/form.html`
+### 7.3. Template Thymeleaf — `templates/validation/form.html`
 
 ```html
 <!DOCTYPE html>
@@ -758,7 +775,7 @@ private String username;
 - [ ] Controller có `BindingResult` **ngay sau** tham số `@Valid`
 - [ ] Khi lỗi, controller `return` lại **cùng view form** (không `redirect` — redirect làm mất `BindingResult`)
 
-### 7.4. Template thành công — `templates/register/success.html`
+### 7.4. Template thành công — `templates/validation/success.html`
 
 ```html
 <!DOCTYPE html>
@@ -915,7 +932,7 @@ flowchart TD
     A["Browser submit form"] --> B["@Controller"]
     B --> C["@Valid @ModelAttribute Account"]
     C --> D{"BindingResult?"}
-    D -->|Lỗi| E["return register/form<br/>th:errors hiển thị"]
+    D -->|Lỗi| E["return validation/form<br/>th:errors hiển thị"]
     D -->|OK| F["AccountService.save()"]
     F --> G["redirect:/register/success"]
 ```
