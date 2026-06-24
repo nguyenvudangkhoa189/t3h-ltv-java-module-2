@@ -22,6 +22,13 @@ import vn.demo.model.UserForm;
 import vn.demo.service.FileStorageService;
 import vn.demo.service.UserService;
 
+/**
+ * Controller cho các màn hình HTML quản lý User (render bằng Thymeleaf).
+ *
+ * <p>Mỗi phương thức xử lý một request, đẩy dữ liệu vào {@link Model} rồi trả về
+ * tên template (vd. {@code "users/list"} → {@code templates/users/list.html}).
+ * Sau khi thêm/sửa/xóa thành công sẽ {@code redirect} theo mẫu Post-Redirect-Get.</p>
+ */
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -31,6 +38,14 @@ public class UserViewController {
 	private final UserService userService;
 	private final FileStorageService fileStorageService;
 
+	/**
+	 * Hiển thị danh sách user có tìm kiếm và phân trang.
+	 *
+	 * @param query từ khóa tìm kiếm ({@code ?q=}), tùy chọn
+	 * @param page  số trang ({@code ?page=}), mặc định 1
+	 * @param model nơi gửi dữ liệu sang view
+	 * @return template {@code users/list}
+	 */
 	@GetMapping
 	public String list(
 			@RequestParam(value = "q", required = false) String query,
@@ -44,6 +59,12 @@ public class UserViewController {
 		return "users/list";
 	}
 
+	/**
+	 * Mở form tạo user mới (form trống).
+	 *
+	 * @param model nơi đặt đối tượng {@code user} rỗng cho form binding
+	 * @return template {@code users/form}
+	 */
 	@GetMapping("/new")
 	public String createForm(Model model) {
 		model.addAttribute("user", new UserForm());
@@ -51,6 +72,19 @@ public class UserViewController {
 		return "users/form";
 	}
 
+	/**
+	 * Xử lý submit tạo user mới kèm upload avatar.
+	 *
+	 * <p>Validate dữ liệu form; nếu có lỗi thì quay lại form. Nếu hợp lệ thì
+	 * lưu avatar (nếu có), tạo user và redirect về danh sách (PRG).</p>
+	 *
+	 * @param user               dữ liệu form đã được validate
+	 * @param bindingResult      kết quả validate
+	 * @param avatar             file ảnh upload (tùy chọn)
+	 * @param model              nơi gửi dữ liệu sang view khi cần render lại form
+	 * @param redirectAttributes nơi đặt flash message hiển thị 1 lần sau redirect
+	 * @return redirect {@code /users} khi thành công, hoặc template {@code users/form} khi lỗi
+	 */
 	@PostMapping
 	public String create(
 			@Valid @ModelAttribute("user") UserForm user,
@@ -84,6 +118,13 @@ public class UserViewController {
 		}
 	}
 
+	/**
+	 * Hiển thị chi tiết một user.
+	 *
+	 * @param id    id user cần xem
+	 * @param model nơi đặt dữ liệu user cho view
+	 * @return template {@code users/detail}, hoặc {@code users/not-found} nếu không thấy
+	 */
 	@GetMapping("/{id}")
 	public String detail(@PathVariable Long id, Model model) {
 		return userService.findById(id)
@@ -94,6 +135,13 @@ public class UserViewController {
 				.orElse("users/not-found");
 	}
 
+	/**
+	 * Mở form sửa user (đổ sẵn dữ liệu hiện tại vào form).
+	 *
+	 * @param id    id user cần sửa
+	 * @param model nơi đặt dữ liệu user cho form binding
+	 * @return template {@code users/form}, hoặc {@code users/not-found} nếu không thấy
+	 */
 	@GetMapping("/{id}/edit")
 	public String editForm(@PathVariable Long id, Model model) {
 		return userService.findById(id)
@@ -105,6 +153,17 @@ public class UserViewController {
 				.orElse("users/not-found");
 	}
 
+	/**
+	 * Xử lý submit cập nhật user kèm upload avatar (tùy chọn).
+	 *
+	 * @param id                 id user cần sửa
+	 * @param user               dữ liệu form đã được validate
+	 * @param bindingResult      kết quả validate
+	 * @param avatar             file ảnh mới (nếu để trống sẽ giữ avatar cũ)
+	 * @param model              nơi gửi dữ liệu sang view khi cần render lại form
+	 * @param redirectAttributes nơi đặt flash message sau redirect
+	 * @return redirect {@code /users} khi thành công, hoặc template form/not-found khi lỗi
+	 */
 	@PostMapping("/{id}")
 	public String update(
 			@PathVariable Long id,
@@ -138,6 +197,13 @@ public class UserViewController {
 		}
 	}
 
+	/**
+	 * Xóa user theo id rồi quay lại danh sách (PRG).
+	 *
+	 * @param id                 id user cần xóa
+	 * @param redirectAttributes nơi đặt flash message thông báo kết quả
+	 * @return redirect {@code /users}
+	 */
 	@PostMapping("/{id}/delete")
 	public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
 		try {

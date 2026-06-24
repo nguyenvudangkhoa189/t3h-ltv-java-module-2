@@ -6,6 +6,12 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Đối tượng vừa dùng làm dữ liệu hiển thị, vừa là form nhập liệu cho User.
+ *
+ * <p>Các annotation validation ({@code @NotBlank}, {@code @Email}...) sẽ được kiểm tra
+ * khi controller nhận form qua {@code @Valid @ModelAttribute}.</p>
+ */
 @Data
 @NoArgsConstructor
 public class UserForm {
@@ -29,6 +35,7 @@ public class UserForm {
 
 	private String avatarUrl;
 
+	/** @return họ và tên ghép lại (an toàn khi một trong hai bị null). */
 	public String getFullName() {
 		return ((firstName != null ? firstName : "") + " " + (lastName != null ? lastName : "")).trim();
 	}

@@ -17,18 +17,40 @@ import lombok.extern.slf4j.Slf4j;
 import vn.demo.dto.UserPage;
 import vn.demo.model.UserForm;
 
+/**
+ * Service quản lý User bằng bộ nhớ tạm (in-memory) — chưa dùng database.
+ *
+ * <p>Toàn bộ user được lưu trong một {@link Map} (mất khi restart app). Lớp này
+ * cung cấp các thao tác CRUD cơ bản cùng tìm kiếm và phân trang cho màn hình danh sách.</p>
+ */
 @Slf4j
 @Service
 public class UserService {
 
+	/** Kho lưu user trong RAM, giữ thứ tự thêm vào nhờ {@link LinkedHashMap}. */
 	private final Map<Long, UserForm> store = new LinkedHashMap<>();
+
+	/** Bộ sinh id tự tăng cho user mới (user mẫu chiếm id 1..12). */
 	private final AtomicLong idSequence = new AtomicLong(13);
+
+	/** Số user hiển thị trên mỗi trang, đọc từ application.properties. */
 	private final int pageSize;
 
+	/**
+	 * Khởi tạo service và đọc kích thước trang từ cấu hình.
+	 *
+	 * @param pageSize số user mỗi trang (key {@code app.users.page-size}, mặc định 5)
+	 */
 	public UserService(@Value("${app.users.page-size:5}") int pageSize) {
 		this.pageSize = pageSize;
 	}
 
+	/**
+	 * Nạp 12 user mẫu vào bộ nhớ ngay khi app khởi động.
+	 *
+	 * <p>Nhờ {@link PostConstruct}, học viên mở {@code /users} là thấy dữ liệu ngay,
+	 * không cần database hay External API.</p>
+	 */
 	@PostConstruct
 	public void initSampleData() {
 		addSample(1L, "Nguyễn", "Văn An", "an.nguyen@example.com", "0901111111");
@@ -46,6 +68,7 @@ public class UserService {
 		log.info("Initialized {} sample users for demo (page size={})", store.size(), pageSize);
 	}
 
+	/** Tạo một user mẫu (avatar để trống) rồi bỏ vào kho. */
 	private void addSample(Long id, String firstName, String lastName, String email, String phone) {
 		UserForm user = new UserForm();
 		user.setId(id);
@@ -56,10 +79,22 @@ public class UserService {
 		store.put(id, user);
 	}
 
+	/**
+	 * Lấy toàn bộ user hiện có.
+	 *
+	 * @return danh sách tất cả user (bản sao, an toàn khi sửa bên ngoài)
+	 */
 	public List<UserForm> findAll() {
 		return new ArrayList<>(store.values());
 	}
 
+	/**
+	 * Tìm kiếm theo từ khóa rồi cắt ra đúng một trang dữ liệu.
+	 *
+	 * @param query từ khóa tìm kiếm (có thể null/rỗng = lấy tất cả)
+	 * @param page  số trang muốn xem (tự đưa về khoảng hợp lệ)
+	 * @return {@link UserPage} chứa user của trang + thông tin phân trang
+	 */
 	public UserPage findPage(String query, int page) {
 		String normalizedQuery = query == null ? "" : query.trim();
 		List<UserForm> filtered = findAll().stream()
@@ -82,6 +117,7 @@ public class UserService {
 		return new UserPage(pageItems, normalizedQuery, safePage, pageSize, totalItems, totalPages);
 	}
 
+	/** Kiểm tra user có khớp từ khóa không (so trên họ, tên, full name, email, SĐT). */
 	private boolean matchesQuery(UserForm user, String query) {
 		if (query.isEmpty()) {
 			return true;
@@ -94,14 +130,27 @@ public class UserService {
 				|| containsIgnoreCase(user.getPhone(), lower);
 	}
 
+	/** So sánh chứa chuỗi, không phân biệt hoa thường và an toàn với null. */
 	private boolean containsIgnoreCase(String value, String lowerQuery) {
 		return value != null && value.toLowerCase(Locale.ROOT).contains(lowerQuery);
 	}
 
+	/**
+	 * Tìm một user theo id.
+	 *
+	 * @param id id cần tìm
+	 * @return {@link Optional} chứa user nếu tồn tại, ngược lại rỗng
+	 */
 	public Optional<UserForm> findById(Long id) {
 		return Optional.ofNullable(store.get(id));
 	}
 
+	/**
+	 * Tạo mới một user và cấp id tự tăng.
+	 *
+	 * @param form dữ liệu user gửi từ form
+	 * @return user sau khi đã được gán id
+	 */
 	public UserForm create(UserForm form) {
 		long newId = idSequence.getAndIncrement();
 		form.setId(newId);
@@ -109,6 +158,14 @@ public class UserService {
 		return form;
 	}
 
+	/**
+	 * Cập nhật user theo id; giữ lại avatar cũ nếu lần này không upload ảnh mới.
+	 *
+	 * @param id   id user cần sửa
+	 * @param form dữ liệu mới từ form
+	 * @return user sau khi cập nhật
+	 * @throws NoSuchElementException nếu id không tồn tại
+	 */
 	public UserForm update(Long id, UserForm form) {
 		if (!store.containsKey(id)) {
 			throw new NoSuchElementException("User not found: " + id);
@@ -122,6 +179,12 @@ public class UserService {
 		return form;
 	}
 
+	/**
+	 * Xóa user theo id.
+	 *
+	 * @param id id user cần xóa
+	 * @throws NoSuchElementException nếu id không tồn tại
+	 */
 	public void delete(Long id) {
 		if (store.remove(id) == null) {
 			throw new NoSuchElementException("User not found: " + id);
