@@ -21,6 +21,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify(payload)
             });
 
+            if (response.status === 400) {
+                applyServerErrors(await response.json());
+                return;
+            }
             if (!response.ok) {
                 throw new Error("Request failed");
             }

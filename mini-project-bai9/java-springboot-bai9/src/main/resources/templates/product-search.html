@@ -14,7 +14,33 @@
 </header>
 
 <main class="container py-4" th:if="${total > 0}">
-    <p class="text-muted mb-4" th:text="'Tìm thấy ' + ${total} + ' sản phẩm'">Tìm thấy 0 sản phẩm</p>
+    <p class="text-muted mb-3" th:text="'Tìm thấy ' + ${total} + ' sản phẩm'">Tìm thấy 0 sản phẩm</p>
+
+    <!-- TN9: sắp xếp kết quả tìm kiếm, giữ nguyên từ khóa -->
+    <form class="row g-2 align-items-end mb-4" method="get" th:action="@{/product_search}">
+        <input type="hidden" name="keyword" th:value="${keyword}"/>
+        <input type="hidden" name="size" th:value="${size}"/>
+        <div class="col-auto">
+            <label class="form-label mb-1 small text-muted">Sắp xếp theo</label>
+            <select class="form-select form-select-sm" name="sortBy">
+                <option value="" th:selected="${sortBy == null or sortBy.isBlank()}">Mặc định</option>
+                <option value="title" th:selected="${sortBy == 'title'}">Tên</option>
+                <option value="price" th:selected="${sortBy == 'price'}">Giá</option>
+                <option value="rating" th:selected="${sortBy == 'rating'}">Đánh giá</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-1 small text-muted">Thứ tự</label>
+            <select class="form-select form-select-sm" name="order">
+                <option value="asc" th:selected="${order == 'asc'}">Tăng dần</option>
+                <option value="desc" th:selected="${order == 'desc'}">Giảm dần</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-sm btn-success">Áp dụng</button>
+        </div>
+    </form>
+
     <div class="row g-4">
         <div class="col-md-6 col-lg-4 col-xl-3" th:each="product : ${products}">
             <div class="card product-card h-100 shadow-sm">
@@ -35,6 +61,46 @@
             </div>
         </div>
     </div>
+
+    <!-- TN8: phân trang dạng: Đầu 1 2 … 5 6 Cuối -->
+    <nav class="mt-5" th:if="${totalPages > 1}"
+         th:with="windowStart=${currentPage - 2 < 1 ? 1 : currentPage - 2}, windowEnd=${currentPage + 2 > totalPages ? totalPages : currentPage + 2}">
+        <ul class="pagination pagination-sm justify-content-center flex-wrap">
+            <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/product_search(keyword=${keyword}, page=1, size=${size}, sortBy=${sortBy}, order=${order})}">Đầu</a>
+            </li>
+
+            <li class="page-item" th:if="${windowStart > 1}">
+                <a class="page-link"
+                   th:href="@{/product_search(keyword=${keyword}, page=1, size=${size}, sortBy=${sortBy}, order=${order})}">1</a>
+            </li>
+            <li class="page-item disabled" th:if="${windowStart > 2}">
+                <span class="page-link">…</span>
+            </li>
+
+            <li class="page-item" th:each="p : ${#numbers.sequence(windowStart, windowEnd)}"
+                th:classappend="${p == currentPage} ? 'active'">
+                <a class="page-link"
+                   th:href="@{/product_search(keyword=${keyword}, page=${p}, size=${size}, sortBy=${sortBy}, order=${order})}"
+                   th:text="${p}">1</a>
+            </li>
+
+            <li class="page-item disabled" th:if="${windowEnd < totalPages - 1}">
+                <span class="page-link">…</span>
+            </li>
+            <li class="page-item" th:if="${windowEnd < totalPages}">
+                <a class="page-link"
+                   th:href="@{/product_search(keyword=${keyword}, page=${totalPages}, size=${size}, sortBy=${sortBy}, order=${order})}"
+                   th:text="${totalPages}">N</a>
+            </li>
+
+            <li class="page-item" th:classappend="${currentPage >= totalPages} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/product_search(keyword=${keyword}, page=${totalPages}, size=${size}, sortBy=${sortBy}, order=${order})}">Cuối</a>
+            </li>
+        </ul>
+    </nav>
 </main>
 
 <main class="container py-5 text-center" th:if="${total == 0}">

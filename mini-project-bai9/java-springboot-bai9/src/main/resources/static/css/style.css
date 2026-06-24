@@ -52,7 +52,22 @@ body {
 }
 
 .search-form {
-    min-width: 280px;
+    min-width: 220px;
+    max-width: 320px;
+}
+
+.search-form .form-control {
+    max-width: 220px;
+}
+
+.pagination .page-link {
+    color: var(--fruit-green);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--fruit-green);
+    border-color: var(--fruit-green);
+    color: #fff;
 }
 
 .form-control.is-invalid {

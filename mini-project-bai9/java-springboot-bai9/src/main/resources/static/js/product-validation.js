@@ -90,3 +90,15 @@ function validateProductForm() {
         brand: data.brand
     };
 }
+
+// Hiển thị lỗi do server (Bean Validation) trả về dạng { tên trường: thông báo }
+function applyServerErrors(errors) {
+    if (!errors) {
+        return;
+    }
+    Object.keys(errors).forEach(function (fieldId) {
+        if (document.getElementById(fieldId)) {
+            setFieldError(fieldId, errors[fieldId]);
+        }
+    });
+}

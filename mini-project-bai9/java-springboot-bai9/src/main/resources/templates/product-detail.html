@@ -49,17 +49,15 @@
             <div class="d-flex gap-2">
                 <a th:href="@{/home}" class="btn btn-outline-secondary">Quay lại</a>
                 <a th:href="@{/product_edit(id=${product.id})}" class="btn btn-success">Sửa sản phẩm</a>
+                <button type="button" id="deleteBtn" class="btn btn-outline-danger"
+                        th:attr="data-product-id=${product.id}">Xóa sản phẩm</button>
             </div>
         </div>
     </div>
 </main>
 
-<main class="container py-5 text-center" th:if="${product == null}">
-    <h2 class="text-danger">Không tìm thấy sản phẩm</h2>
-    <a th:href="@{/home}" class="btn btn-success mt-3">Về trang chủ</a>
-</main>
-
 <div th:replace="~{fragments/layout :: footer}"></div>
 <div th:replace="~{fragments/layout :: scripts}"></div>
+<script th:src="@{/js/product-detail.js}"></script>
 </body>
 </html>

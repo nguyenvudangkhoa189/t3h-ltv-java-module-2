@@ -21,7 +21,10 @@
                         <strong>Slug:</strong>
                         <span th:text="${category.slug}">slug</span>
                     </p>
-                    <a th:href="${category.url}" class="btn btn-sm btn-outline-success" target="_blank" rel="noopener">
+                    <a th:href="@{/home(category=${category.slug})}" class="btn btn-sm btn-success">
+                        Xem sản phẩm
+                    </a>
+                    <a th:href="${category.url}" class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener">
                         Xem API
                     </a>
                 </div>
